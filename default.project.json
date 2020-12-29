@@ -1,0 +1,26 @@
+{
+    "name": "roblox-plugin-importer",
+
+    "tree": {
+        "$className": "DataModel",
+
+        "ServerScriptService": {
+            "$className": "ServerScriptService",
+
+            "PluginImporterPlugin": {
+                "$path": "src",
+
+                "Packages": {
+                    "$className": "Folder",
+
+                    "BasicState": {
+                        "$path": "packages/BasicState/src"
+                    },
+                    "Roact": {
+                        "$path": "packages/Roact/src"
+                    }
+                }
+            }
+        }
+    }
+}
