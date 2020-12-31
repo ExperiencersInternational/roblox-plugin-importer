@@ -6,14 +6,9 @@ local PluginSettings = require(PluginRoot.Libraries.PluginSettings)
 local PluginImporter = require(PluginRoot.Libraries.PluginImporter)
 
 local HttpPermissions = require(script.HttpPermissions)
+local ResultsList = require(script.ResultsList)
 
 local CreationsPage = Roact.Component:extend("CreationsPage")
-
-function CreationsPage:didMount()
-    if self.state.HttpPermissionRequested then
-        PluginImporter.UpdateCreationsInStore()
-    end
-end
 
 function CreationsPage:render()
     return Roact.createElement("Frame", {
@@ -25,6 +20,7 @@ function CreationsPage:render()
         Visible = self.state.Location == "/creations",
     }, {
         HttpPermissions = not self.state.HttpPermissionRequested and Roact.createElement(HttpPermissions),
+        Content = self.state.HttpPermissionRequested and Roact.createElement(ResultsList),
     })
 end
 

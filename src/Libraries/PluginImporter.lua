@@ -10,6 +10,7 @@ local Store = require(script.Parent.Parent.Data.Store)
 local ResourceURL = require(script.Parent.Parent.Data.URLs)
 
 local Module = {}
+Module.ToolboxCache = {}
 
 function Module.FetchPlugin(id: number): Folder
     local assetUrl = string.format(ResourceURL.Asset, id)
@@ -53,64 +54,88 @@ function Module.ImportPlugin(name: string, id: number | string): nil
     })
 end
 
+function Module.SearchToolbox(
+    category: string,
+    creatorId: number,
+    creatorType: number?,
+    sort: string?,
+    limit: number?,
+    page: number?,
+    cacheMode: string?
+)
+    creatorType = creatorType or 1
+    sort = sort or "Updated"
+    limit = limit or 50
+    page = page or 1
+    cacheMode = cacheMode or "Normal"
+
+    local cacheKey = table.concat({ category, creatorId, creatorType, sort, limit, page, cacheMode }, ",")
+    local cacheItem = Module.ToolboxCache[cacheKey]
+
+    if cacheItem and os.clock() - cacheItem.time < 60 then
+        return cacheItem.data
+    end
+
+    local response = HttpService:RequestAsync({
+        Url = string.format(ResourceURL.Toolbox, category, sort, creatorId, limit, page, creatorType, cacheMode)
+    })
+
+    local json = HttpService:JSONDecode(response.Body)
+    local results = {}
+
+    for _, result in ipairs(json.Results) do
+        results[#results + 1] = {
+            Name = result.Asset.Name,
+            Id = result.Asset.Id,
+        }
+    end
+
+    local returns = {
+        page = page,
+        totalPages = math.ceil(json.TotalResults / limit),
+        results = results,
+    }
+
+    Module.ToolboxCache[cacheKey] = {
+        time = os.clock(),
+        data = returns,
+    }
+
+    return returns
+end
+
 function Module.FetchCreations(userId: number?)
     if not userId then
         userId = StudioService:GetUserId()
     end
 
-    local success, response = pcall(function()
-        return HttpService:RequestAsync({
-            Url = string.format(
-                ResourceURL.Proxy,
-                string.format(ResourceURL.PluginCreations, userId, 1)
-            ),
-            Method = "GET",
-            Headers = {
-                Origin = ResourceURL.Origin,
-            },
-        })
-    end)
+    local freePlugins = Module.SearchToolbox("FreePlugins", userId)
+    local whitelistPlugins = Module.SearchToolbox("WhitelistedPlugins", userId)
+    local creations, processedIds = {}, {}
 
-    PluginSettings:Set("HttpPermissionRequested", true)
+    for _, result in ipairs(freePlugins.results) do
+        if processedIds[result.Id] then
+            continue
+        end
 
-    if not success or not response.Success then
-        return Store:Set("ErrorText", response)
+        creations[#creations + 1] = result
+        processedIds[result.Id] = true
     end
 
-    success, response = pcall(function()
-        return HttpService:JSONDecode(response.Body)
-    end)
+    for _, result in ipairs(whitelistPlugins.results) do
+        if processedIds[result.Id] then
+            continue
+        end
 
-    if not success then
-        return Store:Set("ErrorText", response)
-    end
-
-    local creations = {}
-    for _, asset in ipairs(response) do
-        table.insert(creations, {
-            Name = asset.Name,
-            Id = asset.AssetId,
-        })
+        creations[#creations + 1] = result
+        processedIds[result.Id] = true
     end
 
     return creations
 end
 
-function Module.UpdateCreationsInStore()
-    Store:SetState({
-        Creations = {
-            Loading = true,
-        },
-    })
-
-    local creations = Module.FetchCreations()
-
-    Store:Set({
-        Creations = {
-            Loaded = true,
-            Data = creations,
-        },
-    })
+function Module.AllowHttpPermissions()
+    PluginSettings:Set("HttpPermissionRequested", true)
 end
 
 return Module

@@ -46,12 +46,6 @@ function TabBar:render()
                 Selected = location == "/creations",
                 LayoutOrder = 200,
 
-                --[[
-                    This button will be reinstantiated once I can find a reliable way
-                    to fetch the user's creations.
-                --]]
-                Disabled = true,
-
                 Clicked = function()
                     Store:GoTo("/creations")
                 end,

@@ -101,9 +101,7 @@ function HttpPermissions:render()
                 TextColor3 = theme:GetColor("DialogMainButtonText"),
                 TextSize = 14,
 
-                [Roact.Event.MouseButton1Click] = function()
-                    PluginImporter.UpdateCreationsInStore()
-                end,
+                [Roact.Event.MouseButton1Click] = PluginImporter.AllowHttpPermissions,
             }, {
                 BorderRadius = Roact.createElement("UICorner", {
                     CornerRadius = UDim.new(0, 4),
