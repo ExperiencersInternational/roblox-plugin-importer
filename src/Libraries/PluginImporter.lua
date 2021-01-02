@@ -6,7 +6,7 @@ local StudioService = game:GetService("StudioService")
 
 local PluginSettings = require(script.Parent.PluginSettings)
 
-local Store = require(script.Parent.Parent.Data.Store)
+-- local Store = require(script.Parent.Parent.Data.Store)
 local ResourceURL = require(script.Parent.Parent.Data.URLs)
 
 local Module = {}
@@ -42,16 +42,25 @@ end
 function Module.ImportPlugin(name: string, id: number | string): nil
     local resolvedId = Module.BestGuessFromInput(id)
 
+    PluginSettings.PushRecent({
+        Name = name,
+        Id = resolvedId,
+    })
+
     coroutine.wrap(function()
         local pluginAsset = Module.FetchPlugin(resolvedId)
         pluginAsset.Parent = ServerStorage
         Selection:Set({ pluginAsset })
     end)()
 
-    PluginSettings.PushRecent({
-        Name = name,
-        Id = resolvedId,
-    })
+    coroutine.wrap(function()
+        local pluginName = Module.GetPluginName(resolvedId)
+
+        Module.UpdateRecentsFromResults({{
+            Name = pluginName,
+            Id = resolvedId,
+        }})
+    end)()
 end
 
 function Module.SearchToolbox(
@@ -101,7 +110,35 @@ function Module.SearchToolbox(
         data = returns,
     }
 
+    Module.UpdateRecentsFromResults(results)
+
     return returns
+end
+
+function Module.UpdateRecentsFromResults(results: {}?)
+    if type(results) ~= "table" then
+        return
+    end
+
+    local updated = PluginSettings:Get("RecentItems", {})
+
+    local indexes = {}; do
+        for index, item in ipairs(updated) do
+            indexes[item.Id] = index
+        end
+    end
+
+    for _, result in ipairs(results) do
+        local match = indexes[result.Id]
+
+        if not match then
+            continue
+        end
+
+        updated[match].Name = result.Name
+    end
+
+    PluginSettings:Set("RecentItems", updated)
 end
 
 function Module.FetchCreations(userId: number?)
@@ -118,8 +155,9 @@ function Module.FetchCreations(userId: number?)
             continue
         end
 
-        creations[#creations + 1] = result
-        processedIds[result.Id] = true
+        local newIndex = #creations + 1
+        creations[newIndex] = result
+        processedIds[result.Id] = newIndex
     end
 
     for _, result in ipairs(whitelistPlugins.results) do
@@ -127,9 +165,12 @@ function Module.FetchCreations(userId: number?)
             continue
         end
 
-        creations[#creations + 1] = result
-        processedIds[result.Id] = true
+        local newIndex = #creations + 1
+        creations[newIndex] = result
+        processedIds[result.Id] = newIndex
     end
+
+    Module.UpdateRecentsFromResults(creations)
 
     return creations
 end

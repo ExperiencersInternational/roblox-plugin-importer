@@ -11,6 +11,8 @@ function PluginItem:render()
     local props = self.props
     local themeModifier = "Default"
 
+    local lbid = string.gsub(props.Label or tostring(os.clock()), "[^A-Za-z0-9]", "")
+
     return ThemeProvider.withTheme(function(theme: StudioTheme)
         return Roact.createElement("TextButton", {
             AutoButtonColor = false,
@@ -26,7 +28,7 @@ function PluginItem:render()
                 Position = UDim2.fromScale(.5, 0),
                 Size = UDim2.fromOffset(100, 100),
                 ClipsDescendants = true,
-                Image = string.format(ResourceURLs.ThumbnailUrl, props.Id, 150, 150),
+                Image = string.format(ResourceURLs.ThumbnailUrl .. "&_=%s", props.Id, 150, 150, lbid),
                 ImageColor3 = Color3.new(1, 1, 1),
                 ScaleType = Enum.ScaleType.Fit,
             }),
