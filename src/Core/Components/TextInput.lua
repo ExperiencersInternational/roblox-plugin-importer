@@ -73,7 +73,7 @@ function TextInput:GetModifier()
 end
 
 function TextInput:render()
-    local state, props = self.state, self.props
+    local props = self.props
     local themeModifier, hoverlessModifier = self:GetModifier()
 
     return ThemeProvider.withTheme(function(theme: StudioTheme)
@@ -133,7 +133,7 @@ function TextInput:render()
                         PlaceholderColor3 = theme:GetColor("DimmedText", themeModifier),
                         PlaceholderText = props.Placeholder,
                         Text = "",
-                        TextColor3 = theme:GetColor("MainText", themeModifier),
+                        TextColor3 = theme:GetColor("ButtonText", themeModifier),
                         TextSize = 14,
                         TextTruncate = Enum.TextTruncate.AtEnd,
                         TextXAlignment = Enum.TextXAlignment.Left,

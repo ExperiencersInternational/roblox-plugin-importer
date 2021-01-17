@@ -11,7 +11,7 @@ local Header = Roact.Component:extend("Header")
 function Header:render()
     return ThemeProvider.withTheme(function(theme: StudioTheme)
         return Roact.createElement("Frame", {
-            BackgroundColor3 = theme:GetColor("Titlebar"),
+            BackgroundColor3 = theme:GetColor("RibbonTab"),
             BorderSizePixel = 0,
             Size = UDim2.new(1, 0, 0, 64),
             ClipsDescendants = true,

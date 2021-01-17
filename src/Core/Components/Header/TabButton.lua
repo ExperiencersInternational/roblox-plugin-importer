@@ -103,7 +103,7 @@ function TabButton:render()
         return Roact.createElement("TextButton", {
             Active = not props.Disabled,
             AutoButtonColor = false,
-            BackgroundColor3 = theme:GetColor("Tab", deselectedModifier),
+            BackgroundColor3 = theme:GetColor("RibbonTab", deselectedModifier),
             BorderSizePixel = 0,
             LayoutOrder = props.LayoutOrder,
             ClipsDescendants = true,
@@ -119,7 +119,7 @@ function TabButton:render()
                 ClipsDescendants = true,
                 ZIndex = 100,
             }, {
-                Top = props.Selected and MakeBorderFrame(BorderPosition.Top, theme:GetColor("RibbonTabTopBar", themeModifier)),
+                Top = props.Selected and MakeBorderFrame(BorderPosition.Top, theme:GetColor("LinkText", themeModifier)),
                 Right = props.Selected and MakeBorderFrame(BorderPosition.Right, theme:GetColor("Border", themeModifier)),
                 Left = props.Selected and MakeBorderFrame(BorderPosition.Left, theme:GetColor("Border", themeModifier)),
                 Bottom = not props.Selected and MakeBorderFrame(BorderPosition.Bottom, theme:GetColor("Border", themeModifier)),
@@ -158,7 +158,7 @@ function TabButton:render()
                     Size = UDim2.fromOffset(16, 16),
                     ClipsDescendants = true,
                     Image = props.Icon,
-                    ImageColor3 = props.IconColour or theme:GetColor("MainText", themeModifier),
+                    ImageColor3 = props.IconColour or theme:GetColor("ButtonText", themeModifier),
                     ScaleType = Enum.ScaleType.Fit,
                 }),
 
@@ -169,7 +169,7 @@ function TabButton:render()
                     ClipsDescendants = true,
                     Font = Enum.Font.Gotham,
                     Text = props.Label,
-                    TextColor3 = props.LabelColour or theme:GetColor("MainText", themeModifier),
+                    TextColor3 = props.LabelColour or theme:GetColor("ButtonText", themeModifier),
                     TextSize = 14,
                     TextTruncate = Enum.TextTruncate.AtEnd,
                 }),
