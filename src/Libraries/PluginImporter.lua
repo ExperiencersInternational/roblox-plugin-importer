@@ -3,6 +3,7 @@ local Selection = game:GetService("Selection")
 local MarketplaceService = game:GetService("MarketplaceService")
 local HttpService = game:GetService("HttpService")
 local StudioService = game:GetService("StudioService")
+local RunService = game:GetService("RunService")
 
 local PluginSettings = require(script.Parent.PluginSettings)
 
@@ -11,6 +12,39 @@ local ResourceURL = require(script.Parent.Parent.Data.URLs)
 
 local Module = {}
 Module.ToolboxCache = {}
+
+local NetworkRequest; do
+    local Replicated = game:GetService("ReplicatedStorage")
+    local RemoteId = "__PLUGIN_IMPORTER_NET_REQUEST__"
+
+    if RunService:IsRunning() then
+       if RunService:IsClient() then
+            NetworkRequest = Replicated:WaitForChild(RemoteId)
+       else
+            NetworkRequest = Replicated:FindFirstChild(RemoteId)
+
+            if not NetworkRequest then
+                NetworkRequest = Instance.new("RemoteFunction")
+                NetworkRequest.Name = RemoteId
+
+                NetworkRequest.OnServerInvoke = function(_, options)
+                    return Module.SearchToolbox(
+                        options.category,
+                        options.creatorId,
+                        options.creatorType,
+                        options.sort,
+                        options.limit,
+                        options.page,
+                        options.cacheMode
+                    )
+                end
+
+                NetworkRequest.Parent = Replicated
+            end
+
+       end
+    end
+end
 
 function Module.FetchPlugin(id: number): Folder
     local assetUrl = string.format(ResourceURL.Asset, id)
@@ -72,6 +106,18 @@ function Module.SearchToolbox(
     page: number?,
     cacheMode: string?
 )
+    if NetworkRequest and RunService:IsClient() then
+        return NetworkRequest:InvokeServer({
+            category = category,
+            creatorId = creatorId,
+            creatorType = creatorType,
+            sort = sort,
+            limit = limit,
+            page = page,
+            cacheMode = cacheMode,
+        })
+    end
+
     creatorType = creatorType or 1
     sort = sort or "Updated"
     limit = limit or 50

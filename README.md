@@ -20,7 +20,7 @@ Plugin Importer is built with [Roact](https://github.com/Roblox/roact) and [Basi
 * See a list of plugins you've previously imported (up to 100 items)
 * Import directly from your own personal catalogue of published plugins (requires HTTP permissions)
 
-# Basic Usage
+# Usage
 1. Copy and paste a plugin ID or URL from the website.
     * Example 1: `https://www.roblox.com/library/336673829/Plugin-Importer`
     * Example 2: `336673829`

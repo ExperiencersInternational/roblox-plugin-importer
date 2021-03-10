@@ -15,14 +15,14 @@ function Module.Init(plugin: Plugin)
     Module.__plugin = plugin
     Module.__state = PluginState
 
-    local savedConfig = plugin:GetSetting(Config.PluginSettingsKey)
+    local savedConfig = Module.__plugin:GetSetting(Config.PluginSettingsKey)
 
     if savedConfig then
         PluginState:SetState(savedConfig)
     end
 
     PluginState.Changed:Connect(function()
-        plugin:SetSetting(Config.PluginSettingsKey, PluginState:GetState())
+        Module.__plugin:SetSetting(Config.PluginSettingsKey, PluginState:GetState())
     end)
 end
 
