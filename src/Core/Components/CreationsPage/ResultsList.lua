@@ -12,6 +12,7 @@ function ResultsList:render()
             AnchorPoint = Vector2.new(0, 1),
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
+            -- Size = UDim2.new(1, 0, 1, -64),
             Size = UDim2.fromScale(1, 1),
             Position = UDim2.fromScale(0, 1),
             ClipsDescendants = true,

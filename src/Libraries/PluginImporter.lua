@@ -187,13 +187,17 @@ function Module.UpdateRecentsFromResults(results: {}?)
     PluginSettings:Set("RecentItems", updated)
 end
 
-function Module.FetchCreations(userId: number?)
-    if not userId then
-        userId = StudioService:GetUserId()
+function Module.FetchCreations(creatorId: number?, isGroup: boolean?)
+    if not creatorId then
+        creatorId = StudioService:GetUserId()
     end
 
-    local freePlugins = Module.SearchToolbox("FreePlugins", userId)
-    local whitelistPlugins = Module.SearchToolbox("WhitelistedPlugins", userId)
+    if type(isGroup) ~= "boolean" then
+        isGroup = false
+    end
+
+    local freePlugins = Module.SearchToolbox("FreePlugins", creatorId, isGroup and 2 or 1)
+    local whitelistPlugins = Module.SearchToolbox("WhitelistedPlugins", creatorId, isGroup and 2 or 1)
     local creations, processedIds = {}, {}
 
     for _, result in ipairs(freePlugins.results) do
@@ -219,6 +223,28 @@ function Module.FetchCreations(userId: number?)
     Module.UpdateRecentsFromResults(creations)
 
     return creations
+end
+
+function Module.FetchGroupMemberships(userId: number?)
+    if not userId then
+        userId = StudioService:GetUserId()
+    end
+
+    local httpResponse = HttpService:RequestAsync({
+        Url = string.format(ResourceURL.Groups, userId),
+    })
+
+    local json = HttpService:JSONDecode(httpResponse.Body)
+    local results = {}
+
+    for _, result in ipairs(json.data) do
+        table.insert(results, {
+            Id = result.group.id,
+            Name = result.group.name,
+        })
+    end
+
+    return results
 end
 
 function Module.AllowHttpPermissions()
