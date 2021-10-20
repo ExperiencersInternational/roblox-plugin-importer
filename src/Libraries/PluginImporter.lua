@@ -46,8 +46,15 @@ local NetworkRequest; do
     end
 end
 
+function Module.BuildURL(segments: {string}): string
+    assert(#segments == 2, "Invalid number of segments; index 1 should be a subdomain, and 2 should be the path")
+
+    local url = string.format(ResourceURL.Proxy, segments[1], segments[2])
+    return url
+end
+
 function Module.FetchPlugin(id: number): Folder
-    local assetUrl = string.format(ResourceURL.Asset, id)
+    local assetUrl = string.format(Module.BuildURL(ResourceURL.Asset), id)
     local asset = game:GetObjects(assetUrl)[1]
 
     local container = Instance.new("Folder")
@@ -132,7 +139,7 @@ function Module.SearchToolbox(
     end
 
     local response = HttpService:RequestAsync({
-        Url = string.format(ResourceURL.Toolbox, category, sort, creatorId, limit, page, creatorType, cacheMode)
+        Url = string.format(Module.BuildURL(ResourceURL.Toolbox), category, sort, creatorId, limit, page, creatorType, cacheMode)
     })
 
     local json = HttpService:JSONDecode(response.Body)
@@ -231,7 +238,7 @@ function Module.FetchGroupMemberships(userId: number?)
     end
 
     local httpResponse = HttpService:RequestAsync({
-        Url = string.format(ResourceURL.Groups, userId),
+        Url = string.format(Module.BuildURL(ResourceURL.Groups), userId),
     })
 
     local json = HttpService:JSONDecode(httpResponse.Body)
